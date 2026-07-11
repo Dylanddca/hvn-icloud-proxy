@@ -47,11 +47,11 @@ async def fetch_icloud_album(token: str):
         derivatives = p.get("derivatives") or {}
         if not derivatives:
             continue
-        # The checksum is the KEY of each derivative entry, not a field inside it
-        best_key = max(derivatives.keys(), key=lambda k: int(derivatives[k].get("fileSize") or 0))
-        best_checksum_by_guid[p["photoGuid"]] = best_key
+        best = max(derivatives.values(), key=lambda d: int(d.get("fileSize") or 0))
+        best_checksum_by_guid[p["photoGuid"]] = best.get("checksum")
 
-    items = await _icloud_asset_urls(token, host, list(best_checksum_by_guid.values()))
+    checksums_requested = list(best_checksum_by_guid.values())
+    items = await _icloud_asset_urls(token, host, checksums_requested)
 
     photos_out = []
     for p in photos:
@@ -75,6 +75,11 @@ async def fetch_icloud_album(token: str):
         "albumName": stream_data.get("streamName", ""),
         "ctag": stream_data.get("streamCtag", ""),
         "photos": photos_out,
+        "_debug": {
+            "host": host,
+            "checksums_requested": checksums_requested,
+            "items_raw": items,
+        },
     }
 
 
