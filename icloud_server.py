@@ -27,13 +27,13 @@ async def _icloud_webstream(token: str):
 
 async def _icloud_asset_urls(token: str, host: str, checksums: list):
     if not checksums:
-        return {}
+        return {}, {"skipped": "no checksums"}
     url = f"https://{host}/{token}/sharedstreams/webasseturls"
     payload = {"photoGuids": checksums}
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as resp:
             data = await resp.json(content_type=None)
-            return data.get("items", {})
+            return data.get("items", {}), {"status": resp.status, "raw": data}
 
 
 async def fetch_icloud_album(token: str):
@@ -51,7 +51,7 @@ async def fetch_icloud_album(token: str):
         best_checksum_by_guid[p["photoGuid"]] = best.get("checksum")
 
     checksums_requested = list(best_checksum_by_guid.values())
-    items = await _icloud_asset_urls(token, host, checksums_requested)
+    items, raw_asset_response = await _icloud_asset_urls(token, host, checksums_requested)
 
     photos_out = []
     for p in photos:
@@ -79,6 +79,7 @@ async def fetch_icloud_album(token: str):
             "host": host,
             "checksums_requested": checksums_requested,
             "items_raw": items,
+            "raw_asset_response": raw_asset_response,
         },
     }
 
