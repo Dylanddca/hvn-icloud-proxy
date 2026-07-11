@@ -80,6 +80,7 @@ async def fetch_icloud_album(token: str):
             "checksums_requested": checksums_requested,
             "items_raw": items,
             "raw_asset_response": raw_asset_response,
+            "first_photo_raw": photos[0] if photos else None,
         },
     }
 
