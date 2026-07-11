@@ -50,7 +50,7 @@ async def fetch_icloud_album(token: str):
         best = max(derivatives.values(), key=lambda d: int(d.get("fileSize") or 0))
         best_checksum_by_guid[p["photoGuid"]] = best.get("checksum")
 
-    checksums_requested = list(best_checksum_by_guid.values())
+    checksums_requested = [p["photoGuid"] for p in photos]
     items, raw_asset_response = await _icloud_asset_urls(token, host, checksums_requested)
 
     photos_out = []
