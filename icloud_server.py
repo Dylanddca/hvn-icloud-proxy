@@ -58,7 +58,7 @@ async def fetch_icloud_album(token: str):
         guid = p.get("photoGuid")
         checksum = best_checksum_by_guid.get(guid)
         item = items.get(checksum, {}) if checksum else {}
-        item_host = item.get("url_host") or item.get("host")
+        item_host = item.get("url_location") or item.get("url_host") or item.get("host")
         url_path = item.get("url_path")
         full_url = f"https://{item_host}{url_path}" if item_host and url_path else None
         photos_out.append({
